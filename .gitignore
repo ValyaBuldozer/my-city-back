@@ -2,4 +2,6 @@
 __pycache__/
 Pipfile.lock
 dbconfig.json
-static/res/
+static/
+my_city.log
+

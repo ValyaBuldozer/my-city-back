@@ -4,6 +4,7 @@ from models.Place import Place
 from models.PlaceInfo import PlaceInfo
 from models.RouteInfo import RouteInfo
 from models.Answer import Answer
+import logging
 import json
 
 app = Flask(__name__)
@@ -151,7 +152,7 @@ def get_all_places():
 
 @app.route('/places/', methods=['GET'])
 def get_places():
-    db_cursor.execute('SELECT place_id, place_name, place_logo_path FROM places')
+    db_cursor.execute('SELECT place_id, place_name, place_logo_path, place_lat, place_lng FROM places')
     query_result = db_cursor.fetchall()
 
     result_arr = []
@@ -239,4 +240,7 @@ def put_new_place():
 
 
 if __name__ == '__main__':
+
+    logging.basicConfig(filename='my_city.log', level=logging.DEBUG)
+
     app.run(host="0.0.0.0", port="5000")
