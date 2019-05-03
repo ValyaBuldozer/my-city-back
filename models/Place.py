@@ -1,5 +1,6 @@
 from models.RouteInfo import RouteInfo
 
+
 class Place:
 
     def __init__(self, p_id, name, logo_path, image_path, description, question_title, address):
@@ -33,4 +34,5 @@ class Place:
     def set_route_from_db_tuple(self, db_tuple):
         for db_row in db_tuple:
             self.add_route(RouteInfo(db_row))
+
 
