@@ -26,7 +26,8 @@ class DbConnection:
         return self._cursor.fetchall()
 
     def __exec_procedure(self, procedure_name, *args):
-        result_args = self._cursor.callproc(procedure_name, args)
+        # first proc argument - result
+        result_args = self._cursor.callproc(procedure_name, [0, *args])
         return result_args
 
     def fetch_all_routes(self):
@@ -113,4 +114,10 @@ class DbConnection:
                     return 3
 
         return 0
+
+    def delete_route(self, route_id):
+        return self.__exec_procedure('drop_route', route_id)[0]
+
+    def delete_place(self, place_id):
+        return self.__exec_procedure('drop_place', place_id)[0]
 
