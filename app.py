@@ -35,16 +35,16 @@ def get_static(path):
 @app.route('/db/routes', methods=['GET'])
 def get_all_routes():
     query_result = db.fetch_all_routes()
-    return json.dumps(query_result)
+    return to_json(query_result)
 
 
 @app.route('/db/places', methods=['GET'])
 def get_db_places():
     query_result = db.fetch_all_places()
-    return json.dumps(query_result)
+    return to_json(query_result)
 
 
-@app.route('/db/route', methods=['PUT'])
+@app.route('/db/routes', methods=['PUT'])
 def put_new_route():
     content = request.json
     name = content['name']
@@ -81,7 +81,7 @@ def put_new_answer(place_id):
     return 'Success'
 
 
-@app.route('/db/place', methods=['PUT'])
+@app.route('/db/places', methods=['PUT'])
 def put_new_place():
     content = request.json
     name = content['name']
@@ -132,6 +132,26 @@ def get_place_by_id(place_id):
         return abort(404, 'Place not found.')
 
     return to_json(place)
+
+
+@app.route('/routes/<route_id>', methods=['DELETE'])
+def delete_route(route_id):
+    result = db.delete_route(route_id)
+
+    if result != 0:
+        return abort(404, 'Route not found')
+
+    return 'Success'
+
+
+@app.route('/places/<place_id>', methods=['DELETE'])
+def delete_place(place_id):
+    result = db.delete_place(place_id)
+
+    if result != 0:
+        return abort(404, 'Place not found')
+
+    return 'Success'
 
 
 if __name__ == '__main__':
