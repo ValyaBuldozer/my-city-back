@@ -155,7 +155,5 @@ def delete_place(place_id):
 
 
 if __name__ == '__main__':
-
     logging.basicConfig(filename='my_city.log', level=logging.DEBUG)
-
     app.run(host="0.0.0.0", port="5000")
