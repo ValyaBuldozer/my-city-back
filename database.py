@@ -46,7 +46,7 @@ class DbConnection:
 
         for row in raw_result:
             route = RouteInfo(row)
-            route.set_places(self.fetch_places_by_route(route.route_id))
+            route.set_places(self.fetch_places_by_route(route.id))
             result.append(route)
 
         return result
@@ -69,12 +69,12 @@ class DbConnection:
         place = Place(place_raw[0])
 
         # fetching routes
-        routes_raw = self.__fetch_from_procedure('get_routes_by_place', place.place_id)
-        place.place_routes = list(map(lambda route: RouteInfo(route), routes_raw))
+        routes_raw = self.__fetch_from_procedure('get_routes_by_place', place.id)
+        place.routes = list(map(lambda route: RouteInfo(route), routes_raw))
 
         # fetching answers
-        answers_raw = self.__fetch_from_procedure('get_answers_by_place', place.place_id)
-        place.place_answers = list(map(lambda answer: Answer(answer), answers_raw))
+        answers_raw = self.__fetch_from_procedure('get_answers_by_place', place.id)
+        place.answers = list(map(lambda answer: Answer(answer), answers_raw))
 
         return place
 
@@ -102,7 +102,7 @@ class DbConnection:
         # inserting answers
         if answers is not None:
             for answer in answers:
-                result = self.insert_new_answer(place_id, answer.answer_title, answer.answer_is_right, answer.answer_description)
+                result = self.insert_new_answer(place_id, answer.title, answer.is_right, answer.answer_description)
                 if result != 0:
                     return 2
 
