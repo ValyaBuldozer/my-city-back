@@ -121,3 +121,11 @@ class DbConnection:
     def delete_place(self, place_id):
         return self.__exec_procedure('drop_place', place_id)[0]
 
+    def update_route(self, route_id: int, title: str, logo_path: str) -> int:
+        return self.__exec_procedure('update_route', route_id, title, logo_path)[0]
+
+    def update_place(self, place_id: int, name: str, logo_path: str, image_path: str,
+                     description: str, question_title: str, address: str) -> int:
+        return self.__exec_procedure('update_place', place_id, name, logo_path, image_path,
+                                     description, question_title, address)[0]
+

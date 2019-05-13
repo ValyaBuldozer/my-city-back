@@ -1,13 +1,21 @@
-from flask import Flask, abort, request
+from flask import Flask, abort, request, jsonify
+from werkzeug.utils import secure_filename
 from database import DbConnection
 import logging
 import json
+import os
+import uuid
 
 app = Flask(__name__)
 
-with open('dbconfig.json') as config_file:
-	db_config = json.load(config_file)
+UPLOAD_PATH = 'UPLOAD_PATH'
+ALLOWED_EXTENSIONS = 'ALLOWED_EXTENSIONS'
+DIRNAME = os.path.dirname(os.path.abspath(__file__))
+app.config[UPLOAD_PATH] = 'static'
+app.config[ALLOWED_EXTENSIONS] = {'png', 'jpg', 'jpeg'}
 
+with open('dbconfig.json') as config_file:
+    db_config = json.load(config_file)
 
 db = DbConnection(db_config, app)
 
@@ -22,6 +30,14 @@ def to_json(obj):
     ).encode('utf-8')
 
 
+@app.errorhandler(400)
+def log_error(error):
+    message = error.description
+    app.logger.error(message)
+
+    return error
+
+
 @app.route('/')
 def root():
     return 'My city!'
@@ -30,6 +46,27 @@ def root():
 @app.route('/static/<path:path>', methods=['GET'])
 def get_static(path):
     return app.send_static_file(path)
+
+
+@app.route('/static/', methods=['PUT'])
+def upload_file():
+    if 'file' not in request.files:
+        return abort(400, 'No files to save')
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return abort(400, 'No files to save')
+
+    ext = file.filename.rsplit('.', 1)[::-1][0]
+
+    if ext not in app.config[ALLOWED_EXTENSIONS]:
+        return abort(400, 'This file type is not allowed')
+
+    file.filename = str(uuid.uuid1()) + '.' + ext
+    file.save(os.path.join(DIRNAME, app.config[UPLOAD_PATH], file.filename))
+
+    return file.filename
 
 
 @app.route('/db/routes', methods=['GET'])
@@ -152,6 +189,42 @@ def delete_place(place_id):
         return abort(404, 'Place not found')
 
     return 'Success'
+
+
+@app.route('/routes/<route_id>', methods=['POST'])
+def update_route(route_id):
+    content = request.json
+
+    result = db.update_route(
+        route_id,
+        content['name'],
+        content['logo_path']
+    )
+
+    if result == 1:
+        return abort(404, 'Route not found')
+    else:
+        return 'Success'
+
+
+@app.route('/places/<place_id>', methods=['POST'])
+def update_place(place_id):
+    content = request.json
+
+    result = db.update_place(
+        place_id=place_id,
+        name=content['name'],
+        logo_path=content['logo_path'],
+        image_path=content['image_path'],
+        description=content['description'],
+        question_title=content['question_title'],
+        address=content['address']
+    )
+
+    if result == 1:
+        return abort(404, 'Place not found')
+    else:
+        return 'Success'
 
 
 if __name__ == '__main__':
