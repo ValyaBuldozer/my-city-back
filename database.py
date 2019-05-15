@@ -30,17 +30,21 @@ class DbConnection:
         result_args = self._cursor.callproc(procedure_name, [0, *args])
         return result_args
 
-    def fetch_all_routes(self):
-        return self.__fetch_from_procedure('get_all_routes')
+    def fetch_full_places(self) -> List[Place]:
+        places_result = self.__fetch_from_procedure('get_full_places')
+        places = list(map(lambda db_tuple: Place(db_tuple), places_result))
 
-    def fetch_all_places(self):
-        return self.__fetch_from_procedure('get_full_places')
+        for place in places:
+            place.answers = self.fetch_answers_by_place(place.id)
+            place.routes = self.fetch_routes_by_place(place.id)
+
+        return places
 
     def fetch_places_info(self) -> List[PlaceInfo]:
         raw_result = self.__fetch_from_procedure('get_places_info')
         return list(map(lambda db_tuple: PlaceInfo(db_tuple), raw_result))
 
-    def fetch_routes_info(self) -> List[RouteInfo]:
+    def fetch_routes(self) -> List[RouteInfo]:
         raw_result = self.__fetch_from_procedure('get_routes_info')
         result = []
 
@@ -51,8 +55,9 @@ class DbConnection:
 
         return result
 
-    def fetch_routes_by_place(self, place_id):
-        return self.__fetch_from_procedure('get_routes_by_place', place_id)
+    def fetch_routes_by_place(self, place_id) -> List[RouteInfo]:
+        routes_result = self.__fetch_from_procedure('get_routes_by_place', place_id)
+        return list(map(lambda db_tuple: RouteInfo(db_tuple), routes_result))
 
     def fetch_places_by_route(self, route_id):
         return list(map(
@@ -78,8 +83,9 @@ class DbConnection:
 
         return place
 
-    def fetch_answers_by_place(self, place_id):
-        return self.__fetch_from_procedure('get_answers_by_place', place_id)
+    def fetch_answers_by_place(self, place_id) -> List[Answer]:
+        answers_result = self.__fetch_from_procedure('get_answers_by_place', place_id)
+        return list(map(lambda db_tuple: Answer(db_tuple), answers_result))
 
     def insert_new_route(self, route_name, route_logo_path):
         return self.__exec_procedure('put_new_route', route_name, route_logo_path)[0]

@@ -69,19 +69,41 @@ def upload_file():
     return file.filename
 
 
-@app.route('/db/routes', methods=['GET'])
-def get_all_routes():
-    query_result = db.fetch_all_routes()
-    return to_json(query_result)
+@app.route('/api/places', methods=['GET'])
+def get_places():
+    places = db.fetch_places_info()
+    return to_json(places)
 
 
-@app.route('/db/places', methods=['GET'])
-def get_db_places():
-    query_result = db.fetch_all_places()
-    return to_json(query_result)
+@app.route('/api/routes', methods=['GET'])
+def get_routes():
+    routes = db.fetch_routes()
+    return to_json(routes)
 
 
-@app.route('/db/routes', methods=['PUT'])
+@app.route('/api/places/<place_id>', methods=['GET'])
+def get_place_by_id(place_id):
+    place = db.fetch_place(place_id)
+
+    if place is None:
+        return abort(404, 'Place not found.')
+
+    return to_json(place)
+
+
+@app.route('/admin/places', methods=['GET'])
+def get_full_places():
+    places = db.fetch_full_places()
+    return to_json(places)
+
+
+@app.route('/admin/routes', methods=['GET'])
+def get_full_routes():
+    routes = db.fetch_routes()
+    return to_json(routes)
+
+
+@app.route('/admin/routes', methods=['PUT'])
 def put_new_route():
     content = request.json
     name = content['name']
@@ -98,7 +120,7 @@ def put_new_route():
     return 'Success!'
 
 
-@app.route('/db/place/<place_id>/answers', methods=['PUT'])
+@app.route('/admin/place/<place_id>/answers', methods=['PUT'])
 def put_new_answer(place_id):
     content = request.json
 
@@ -118,7 +140,7 @@ def put_new_answer(place_id):
     return 'Success'
 
 
-@app.route('/db/places', methods=['PUT'])
+@app.route('/admin/places', methods=['PUT'])
 def put_new_place():
     content = request.json
     name = content['name']
@@ -149,29 +171,7 @@ def put_new_place():
         return abort(500, 'Unknown error')
 
 
-@app.route('/places', methods=['GET'])
-def get_places():
-    places = db.fetch_places_info()
-    return to_json(places)
-
-
-@app.route('/routes', methods=['GET'])
-def get_routes():
-    routes = db.fetch_routes_info()
-    return to_json(routes)
-
-
-@app.route('/places/<place_id>', methods=['GET'])
-def get_place_by_id(place_id):
-    place = db.fetch_place(place_id)
-
-    if place is None:
-        return abort(404, 'Place not found.')
-
-    return to_json(place)
-
-
-@app.route('/routes/<route_id>', methods=['DELETE'])
+@app.route('/admin/routes/<route_id>', methods=['DELETE'])
 def delete_route(route_id):
     result = db.delete_route(route_id)
 
@@ -181,7 +181,7 @@ def delete_route(route_id):
     return 'Success'
 
 
-@app.route('/places/<place_id>', methods=['DELETE'])
+@app.route('/admin/places/<place_id>', methods=['DELETE'])
 def delete_place(place_id):
     result = db.delete_place(place_id)
 
@@ -191,7 +191,7 @@ def delete_place(place_id):
     return 'Success'
 
 
-@app.route('/routes/<route_id>', methods=['POST'])
+@app.route('/admin/routes/<route_id>', methods=['POST'])
 def update_route(route_id):
     content = request.json
 
@@ -207,7 +207,7 @@ def update_route(route_id):
         return 'Success'
 
 
-@app.route('/places/<place_id>', methods=['POST'])
+@app.route('/admin/places/<place_id>', methods=['POST'])
 def update_place(place_id):
     content = request.json
 
