@@ -15,6 +15,7 @@ class DbConnection:
         flask_app.config['MYSQL_DATABASE_PASSWORD'] = db_config["password"]
         flask_app.config['MYSQL_DATABASE_DB'] = db_config["db_name"]
         flask_app.config['MYSQL_DATABASE_HOST'] = db_config["host"]
+        flask_app.config['MYSQL_CONNECT_TIMEOUT'] = 30
 
         mysql.init_app(flask_app)
 
