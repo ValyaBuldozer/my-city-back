@@ -21,6 +21,10 @@ class DbConnection:
         self._connection = mysql.connect()
         self._cursor = self._connection.cursor()
 
+    def close(self):
+        self._cursor.close()
+        self._connection.close()
+
     def __fetch_from_procedure(self, procedure_name, *args):
         self._cursor.callproc(procedure_name, args)
         return self._cursor.fetchall()

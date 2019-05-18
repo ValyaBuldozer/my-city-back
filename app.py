@@ -30,6 +30,15 @@ def to_json(obj):
     ).encode('utf-8')
 
 
+def shutdown_server():
+    db.close()
+
+    shutdown_func = request.environ.get('werkzeug.server.shutdown')
+    if shutdown_func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    shutdown_func()
+
+
 @app.errorhandler(400)
 def log_error(error):
     message = error.description
@@ -41,6 +50,12 @@ def log_error(error):
 @app.route('/')
 def root():
     return 'My city!'
+
+
+@app.route('/shutdown', methods=['GET'])
+def shutdown():
+    shutdown_server()
+    return "Good night, sweet prince..."
 
 
 @app.route('/static/<path:path>', methods=['GET'])
