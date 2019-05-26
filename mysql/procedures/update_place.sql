@@ -8,12 +8,11 @@ CREATE PROCEDURE update_place(
     image_path VARCHAR(400),
     description TEXT,
     question_title VARCHAR(400),
-    address VARCHAR(400),
-    lat DECIMAL(10, 8),
-    lng DECIMAL(11,8))
+    address VARCHAR(400)
+)
 BEGIN 
 	IF id NOT IN (SELECT place_id FROM places) THEN
-		SET result = 0;
+		SET result = 1;
 	ELSE 
 		UPDATE places 
         SET
@@ -22,9 +21,7 @@ BEGIN
 			place_image_path = image_path, 
 			place_description = description, 
 			place_question_title = question_title,
-			place_address = address,
-			place_lat = lat,
-			place_lng = lng
+			place_address = address
 		WHERE place_id = id;
 		
 		SET result = 0;

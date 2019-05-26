@@ -3,7 +3,8 @@ from models.RouteInfo import RouteInfo
 
 class Place:
 
-    def __init__(self, p_id, name, logo_path, image_path, description, question_title, address):
+    def __init__(self, p_id, name, logo_path, image_path, description, question_title, address,
+                 routes=None, answers=None):
         self.id = p_id
         self.name = name
         self.logo_path = logo_path
@@ -11,19 +12,8 @@ class Place:
         self.description = description
         self.question_title = question_title
         self.address = address
-        self.routes = []
-        self.answers = []
-
-    def __init__(self, init_tuple):
-        self.id = init_tuple[0]
-        self.name = init_tuple[1]
-        self.logo_path = init_tuple[2]
-        self.image_path = init_tuple[3]
-        self.description = init_tuple[4]
-        self.question_title = init_tuple[5]
-        self.address = init_tuple[6]
-        self.routes = []
-        self.answers = []
+        self.routes = routes if routes is not None else []
+        self.answers = answers if answers is not None else []
 
     def add_route(self, route):
         self.routes.append(route.__dict__)

@@ -8,9 +8,7 @@ CREATE PROCEDURE put_new_place(
     image_path VARCHAR(400),
     description TEXT,
     question_title VARCHAR(400),
-    address VARCHAR(400),
-    lat DECIMAL(10, 8),
-    lng DECIMAL(11,8))
+    address VARCHAR(400))
 BEGIN 
 	INSERT INTO places (
         place_name, 
@@ -18,12 +16,10 @@ BEGIN
         place_image_path, 
         place_description, 
         place_question_title,
-        place_address,
-        place_lat,
-        place_lng ) 
-	VALUES (name, logo_path, image_path, description, question_title, address, lat, lng);
+        place_address ) 
+	VALUES (name, logo_path, image_path, description, question_title, address);
     
     SET ID = LAST_INSERT_ID();
-    SET result = 0;
+    SET result = 10;
 END;
 //
