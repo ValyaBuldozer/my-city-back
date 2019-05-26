@@ -20,6 +20,6 @@ BEGIN
 	VALUES (name, logo_path, image_path, description, question_title, address);
     
     SET ID = LAST_INSERT_ID();
-    SET result = 10;
+    SET result = 0;
 END;
 //

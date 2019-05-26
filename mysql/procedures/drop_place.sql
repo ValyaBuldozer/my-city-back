@@ -6,8 +6,6 @@ BEGIN
 		SET result = 1;
     ELSE 
 		DELETE FROM places WHERE place_id = id;
-        DELETE FROM route_place WHERE place_id = id;
-        DELETE FROM answer WHERE place_id = id;
 		SET result = 0;
 	END IF;
 END;
