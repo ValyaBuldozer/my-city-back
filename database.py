@@ -32,7 +32,12 @@ class DbConnection:
 
     def __exec_procedure(self, procedure_name, *args):
         # first proc argument - result
-        result_args = self._cursor.callproc(procedure_name, [0, *args])
+        self._cursor.callproc(procedure_name, [0, *args])
+
+        self._cursor.execute('SELECT @_{0}_0, @_{0}_1;'.format(procedure_name))
+        result_args = self._cursor.fetchone()
+
+        self._connection.commit()
         return result_args
 
     def fetch_full_places(self) -> List[Place]:
