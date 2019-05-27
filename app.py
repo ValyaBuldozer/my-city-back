@@ -1,9 +1,11 @@
 from flask import Flask, abort, request, jsonify
 from werkzeug.utils import secure_filename
+from functools import wraps
 from models.Place import Place
 from models.RouteInfo import RouteInfo
 from models.Answer import Answer
 from database import DbConnection
+from uuid import uuid4
 import logging
 import json
 import os
@@ -21,6 +23,7 @@ with open('dbconfig.json') as config_file:
     db_config = json.load(config_file)
 
 db = DbConnection(db_config, app)
+tokens = []
 
 
 # TODO(remove indents in production)
@@ -31,6 +34,19 @@ def to_json(obj):
         ensure_ascii=False,
         indent=4
     ).encode('utf-8')
+
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        token = request.headers.get('token')
+
+        if token not in tokens:
+            return abort(401, 'Not authorized')
+
+        return f(*args, **kwargs)
+
+    return wrap
 
 
 def shutdown_server():
@@ -111,18 +127,21 @@ def get_place_by_id(place_id):
 
 
 @app.route('/admin/places', methods=['GET'])
+@login_required
 def get_full_places():
     places = db.fetch_full_places()
     return to_json(places)
 
 
 @app.route('/admin/routes', methods=['GET'])
+@login_required
 def get_full_routes():
     routes = db.fetch_routes()
     return to_json(routes)
 
 
 @app.route('/admin/routes', methods=['PUT'])
+@login_required
 def put_new_route():
     content = request.json
     name = content['name']
@@ -140,6 +159,7 @@ def put_new_route():
 
 
 @app.route('/admin/place/<place_id>/answers', methods=['PUT'])
+@login_required
 def put_new_answer(place_id):
     content = request.json
 
@@ -160,6 +180,7 @@ def put_new_answer(place_id):
 
 
 @app.route('/admin/places', methods=['PUT'])
+@login_required
 def put_new_place():
     content = request.json
     place = Place(
@@ -188,6 +209,7 @@ def put_new_place():
 
 
 @app.route('/admin/routes/<route_id>', methods=['DELETE'])
+@login_required
 def delete_route(route_id):
     result = db.delete_route(route_id)
 
@@ -198,6 +220,7 @@ def delete_route(route_id):
 
 
 @app.route('/admin/places/<place_id>', methods=['DELETE'])
+@login_required
 def delete_place(place_id):
     result = db.delete_place(place_id)
 
@@ -208,6 +231,7 @@ def delete_place(place_id):
 
 
 @app.route('/admin/routes/<route_id>', methods=['POST'])
+@login_required
 def update_route(route_id):
     content = request.json
 
@@ -224,6 +248,7 @@ def update_route(route_id):
 
 
 @app.route('/admin/places/<place_id>', methods=['POST'])
+@login_required
 def update_place(place_id):
     content = request.json
 
@@ -243,6 +268,36 @@ def update_place(place_id):
         return abort(400, 'Invalid request')
     else:
         return to_json(result)
+
+
+@app.route('/admin/register', methods=['PUT'])
+def register_user():
+    content = request.json
+
+    result = db.register_user(content['username'], content['password'])
+
+    if result == 1:
+        return abort(400, 'User already registered')
+    else:
+        token = str(uuid4())
+        tokens.append(token)
+        return token
+
+
+@app.route('/admin/login', methods=['GET', 'PUT'])
+def login_user():
+    content = request.json
+
+    result = db.login_user(content['username'], content['password'])
+
+    if result == 1:
+        return abort(422, 'User not found')
+    elif result == 2:
+        return abort(400, 'Invalid password')
+    else:
+        token = str(uuid4())
+        tokens.append(token)
+        return token
 
 
 if __name__ == '__main__':

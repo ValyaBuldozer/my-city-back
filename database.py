@@ -165,3 +165,13 @@ class DbConnection:
                 pass
 
         return place
+
+    def register_user(self, name, password):
+        result = self.__exec_procedure('register_user', name, password)
+
+        return result[0]
+
+    def login_user(self, name, password):
+        result = self.__exec_procedure('login_user', name, password)
+
+        return result[0]
