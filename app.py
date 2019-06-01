@@ -191,8 +191,12 @@ def put_new_place():
         description=content['description'],
         question_title=content['question_title'],
         address=content['address'],
-        answers=list(map(lambda ans: Answer(ans['id'], ans['title'], ans['is_right'], ans['description']), content['answers'])),
-        routes=list(map(lambda route: RouteInfo(route['id'], route['name'], route['logo_path']), content['routes']))
+        answers=list(map(
+            lambda ans: Answer(ans['id'], ans['title'], ans['is_right'], ans['description']), content['answers']
+        )),
+        routes=list(
+            map(lambda route: RouteInfo(route['id'], route['name'], route['logo_path']), content['routes']
+        ))
     )
 
     result = db.insert_new_place(place)
@@ -204,7 +208,6 @@ def put_new_place():
     elif result == 3:
         return abort(400, 'Invalid routes data. Place was added')
     else:
-        # return place id todo(need something else here)
         return to_json(result)
 
 

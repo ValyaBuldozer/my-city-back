@@ -9,7 +9,7 @@ from models.RouteInfo import RouteInfo
 class DbConnection:
 
     def __init__(self, db_config, flask_app):
-        mysql = MySQL()
+        self.mysql = MySQL()
 
         flask_app.config['MYSQL_DATABASE_USER'] = db_config["user"]
         flask_app.config['MYSQL_DATABASE_PASSWORD'] = db_config["password"]
@@ -17,9 +17,9 @@ class DbConnection:
         flask_app.config['MYSQL_DATABASE_HOST'] = db_config["host"]
         flask_app.config['MYSQL_CONNECT_TIMEOUT'] = 30
 
-        mysql.init_app(flask_app)
+        self.mysql.init_app(flask_app)
 
-        self._connection = mysql.connect()
+        self._connection = self.mysql.connect()
         self._cursor = self._connection.cursor()
 
     def close(self):
@@ -27,17 +27,31 @@ class DbConnection:
         self._connection.close()
 
     def __fetch_from_procedure(self, procedure_name, *args):
-        self._cursor.callproc(procedure_name, args)
-        return self._cursor.fetchall()
+        connection = self.mysql.connect()
+        cursor = connection.cursor()
+
+        cursor.callproc(procedure_name, args)
+        fetched_data = cursor.fetchall()
+
+        cursor.close()
+        connection.close()
+
+        return fetched_data
 
     def __exec_procedure(self, procedure_name, *args):
+        connection = self.mysql.connect()
+        cursor = connection.cursor()
+
         # first proc argument - result
-        self._cursor.callproc(procedure_name, [0, *args])
+        cursor.callproc(procedure_name, [0, *args])
 
-        self._cursor.execute('SELECT @_{0}_0, @_{0}_1;'.format(procedure_name))
-        result_args = self._cursor.fetchone()
+        cursor.execute('SELECT @_{0}_0, @_{0}_1;'.format(procedure_name))
+        result_args = cursor.fetchone()
 
-        self._connection.commit()
+        connection.commit()
+        cursor.close()
+        connection.close()
+
         return result_args
 
     def fetch_full_places(self) -> List[Place]:

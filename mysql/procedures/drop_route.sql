@@ -6,7 +6,6 @@ BEGIN
 		SET result = 1;
     ELSE 
 		DELETE FROM routes WHERE route_id = ID;
-        DELETE FROM route_place WHERE route_id = ID;
 		SET result = 0;
 	END IF;
 END;
